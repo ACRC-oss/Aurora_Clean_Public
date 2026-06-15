@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aurora Clean Build / Dev Status</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg-0: #030505;
+      --bg-1: #07100d;
+      --bg-2: #0c0714;
+      --panel: rgba(7, 12, 11, 0.92);
+      --panel-strong: rgba(10, 16, 15, 0.96);
+      --panel-soft: rgba(8, 10, 15, 0.9);
+      --line: rgba(84, 255, 159, 0.2);
+      --line-strong: rgba(165, 107, 255, 0.42);
+      --text: #edf7f1;
+      --muted: #9bc0ae;
+      --signal: #68ffa7;
+      --signal-soft: rgba(104, 255, 167, 0.14);
+      --aurora: #a56bff;
+      --aurora-soft: rgba(165, 107, 255, 0.16);
+      --danger: #ff8aa8;
+      --shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
+      --mono: "Consolas", "Lucida Console", "Courier New", monospace;
+      --sans: "Trebuchet MS", "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      background: #030505;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--sans);
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(104, 255, 167, 0.12), transparent 24%),
+        radial-gradient(circle at top right, rgba(165, 107, 255, 0.16), transparent 28%),
+        linear-gradient(180deg, var(--bg-2) 0%, var(--bg-1) 40%, var(--bg-0) 100%);
+    }
+
+    main {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 26px 18px 48px;
+    }
+
+    section,
+    article {
+      min-width: 0;
+    }
+
+    h1,
+    h2,
+    h3,
+    p,
+    ul {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      font-size: clamp(2.1rem, 5vw, 3.45rem);
+      line-height: 1.02;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      font-size: 1.15rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .muted,
+    .hero-note,
+    .panel-copy,
+    .fact-list li,
+    .route-list li,
+    .boundary-list li {
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .shell {
+      display: grid;
+      gap: 18px;
+    }
+
+    .card {
+      position: relative;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background:
+        linear-gradient(180deg, rgba(10, 18, 16, 0.96), rgba(5, 8, 9, 0.98)),
+        var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(104, 255, 167, 0.55), rgba(165, 107, 255, 0.55), transparent);
+      pointer-events: none;
+    }
+
+    .hero {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr);
+      padding: 22px;
+      background:
+        radial-gradient(circle at 20% 15%, rgba(104, 255, 167, 0.08), transparent 34%),
+        radial-gradient(circle at 85% 0%, rgba(165, 107, 255, 0.18), transparent 36%),
+        linear-gradient(180deg, rgba(12, 19, 18, 0.98), rgba(6, 8, 12, 0.98));
+    }
+
+    .badge-row,
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .chip,
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      min-height: 34px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .badge {
+      border: 1px solid rgba(104, 255, 167, 0.36);
+      background: rgba(104, 255, 167, 0.08);
+      color: var(--signal);
+      box-shadow: inset 0 0 0 1px rgba(104, 255, 167, 0.06);
+    }
+
+    .chip {
+      border: 1px solid rgba(165, 107, 255, 0.28);
+      background: rgba(165, 107, 255, 0.1);
+      color: #dfc8ff;
+    }
+
+    .chip.pass {
+      border-color: rgba(104, 255, 167, 0.34);
+      background: var(--signal-soft);
+      color: var(--signal);
+    }
+
+    .chip.warn {
+      border-color: rgba(255, 138, 168, 0.28);
+      background: rgba(255, 138, 168, 0.09);
+      color: #ffadc2;
+    }
+
+    .hero-note {
+      max-width: 72ch;
+      margin-bottom: 0;
+      font-size: 1rem;
+    }
+
+    .hero-side {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+      padding: 16px;
+      border: 1px solid var(--line-strong);
+      border-radius: 20px;
+      background:
+        linear-gradient(180deg, rgba(21, 12, 31, 0.92), rgba(8, 10, 15, 0.96)),
+        var(--panel-soft);
+    }
+
+    .hero-side h2 {
+      margin-bottom: 0;
+      color: var(--text);
+    }
+
+    .status-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .status-grid div {
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(104, 255, 167, 0.14);
+      background: rgba(6, 13, 11, 0.86);
+    }
+
+    .status-grid strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .status-grid span {
+      color: var(--signal);
+      font-size: 0.92rem;
+    }
+
+    .layout {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    }
+
+    .span-2 {
+      grid-column: 1 / -1;
+    }
+
+    .section-head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .section-kicker {
+      color: var(--aurora);
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .body-card,
+    .probe-card {
+      padding: 18px;
+    }
+
+    .panel-grid,
+    .facts-grid,
+    .route-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .facts-grid {
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    }
+
+    .fact,
+    .status-panel {
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(104, 255, 167, 0.16);
+      background: rgba(8, 13, 13, 0.88);
+    }
+
+    .fact strong,
+    .status-panel strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.84rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .fact span {
+      color: var(--signal);
+      line-height: 1.55;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 16px 0 14px;
+    }
+
+    button {
+      min-height: 42px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(104, 255, 167, 0.26);
+      background:
+        linear-gradient(135deg, rgba(104, 255, 167, 0.18), rgba(13, 22, 19, 0.98) 52%, rgba(165, 107, 255, 0.2));
+      color: var(--text);
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 0.86rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      box-shadow: 0 0 0 1px rgba(8, 12, 11, 0.65), 0 0 28px rgba(165, 107, 255, 0.08);
+    }
+
+    button:hover {
+      border-color: rgba(104, 255, 167, 0.44);
+      box-shadow: 0 0 0 1px rgba(8, 12, 11, 0.65), 0 0 24px rgba(104, 255, 167, 0.12);
+    }
+
+    button:focus {
+      outline: 2px solid rgba(165, 107, 255, 0.58);
+      outline-offset: 2px;
+    }
+
+    .status-panel {
+      min-height: 116px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      color: #d9ffe9;
+      box-shadow: inset 0 0 0 1px rgba(104, 255, 167, 0.04);
+    }
+
+    .route-grid {
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .route-column,
+    .boundary-column {
+      padding: 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(165, 107, 255, 0.18);
+      background:
+        linear-gradient(180deg, rgba(15, 17, 24, 0.9), rgba(7, 11, 10, 0.96)),
+        var(--panel-soft);
+    }
+
+    .route-column.good {
+      border-color: rgba(104, 255, 167, 0.18);
+    }
+
+    .route-column h3,
+    .boundary-column h3 {
+      margin-bottom: 10px;
+      color: var(--text);
+      font-size: 0.98rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .route-list,
+    .boundary-list,
+    .fact-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .route-list li,
+    .boundary-list li,
+    .fact-list li {
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(104, 255, 167, 0.12);
+      background: rgba(6, 10, 9, 0.76);
+    }
+
+    .route-list li strong,
+    .boundary-list li strong {
+      color: var(--text);
+    }
+
+    .boundary-columns {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .note-band {
+      padding: 16px 18px;
+      border-radius: 18px;
+      border: 1px solid var(--line-strong);
+      background:
+        linear-gradient(135deg, rgba(18, 25, 22, 0.96), rgba(26, 15, 40, 0.94)),
+        var(--panel-soft);
+      color: var(--text);
+      font-family: var(--mono);
+      line-height: 1.65;
+    }
+
+    code,
+    pre {
+      font-family: var(--mono);
+    }
+
+    code {
+      color: #d7b8ff;
+    }
+
+    .code-block {
+      margin: 0;
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(104, 255, 167, 0.16);
+      background: rgba(5, 9, 9, 0.9);
+      color: #e7fff0;
+      overflow-x: auto;
+    }
+
+    .microcopy {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    @media (max-width: 900px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .status-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      main {
+        padding: 18px 14px 38px;
+      }
+
+      .hero,
+      .body-card,
+      .probe-card {
+        padding: 16px;
+      }
+
+      .status-grid,
+      .facts-grid {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 1.85rem;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="shell">
+      <section class="card hero">
+        <div>
+          <div class="badge-row">
+            <div class="badge">Read-only local status room</div>
+            <div class="chip pass">Read-only diagnostics</div>
+            <div class="chip pass">/api/normal-chat only</div>
+            <div class="chip">Aurora clean contract</div>
+          </div>
+          <h1>Dev Diagnostic Surface</h1>
+          <p class="hero-note">This page cannot run commands, edit files, write memory, or change settings. Black / green / purple control-room styling keeps local route truth readable without implying runtime power. No commands. No file edits. No memory writes. No profile writes. No tools. No vehicle control. No vision connected.</p>
+          <div class="chip-row" style="margin-top: 14px;">
+            <div class="chip pass">Green = read-only pass signal</div>
+            <div class="chip">Purple = Aurora boundary accent</div>
+            <div class="chip warn">No runtime power implied</div>
+          </div>
+        </div>
+        <aside class="hero-side">
+          <h2>Read-only diagnostics</h2>
+          <div class="status-grid">
+            <div>
+              <strong>Mode</strong>
+              <span>Read-only</span>
+            </div>
+            <div>
+              <strong>Commands</strong>
+              <span>No commands</span>
+            </div>
+            <div>
+              <strong>Files</strong>
+              <span>No file edits</span>
+            </div>
+            <div>
+              <strong>Memory</strong>
+              <span>No memory writes</span>
+            </div>
+            <div>
+              <strong>Profiles</strong>
+              <span>No profile writes</span>
+            </div>
+            <div>
+              <strong>Tools</strong>
+              <span>No tools</span>
+            </div>
+          </div>
+          <p class="microcopy">Safe GET checks only. no memory routes. no profile routes. no tool routes. no developer actions. no old Aurora imports.</p>
+        </aside>
+      </section>
+
+      <section class="layout">
+        <article class="card probe-card span-2">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">Live probe surface</div>
+              <h2>Safe GET probes only</h2>
+            </div>
+            <div class="chip pass">Read-only local checks</div>
+          </div>
+          <p class="panel-copy">These real probe buttons only call <code>GET /health</code> and <code>GET /api/normal-chat</code>. Returned JSON stays visible as plain text for local diagnostics. No POST controls, no fake controls, and no write flows live here.</p>
+          <div class="facts-grid">
+            <div class="fact">
+              <strong>Health contract</strong>
+              <span>Expect <code>ok true</code>, <code>server Aurora_Clean_Build</code>, and <code>mode clean</code>.</span>
+            </div>
+            <div class="fact">
+              <strong>Chat contract</strong>
+              <span>Expect <code>route /api/normal-chat</code> and <code>method POST required</code> on GET.</span>
+            </div>
+            <div class="fact">
+              <strong>Truth boundary</strong>
+              <span><code>/api/normal-chat</code> remains the only chat endpoint on this clean surface.</span>
+            </div>
+          </div>
+          <div class="toolbar">
+            <button id="refresh-health" type="button">Probe /health</button>
+            <button id="refresh-chat-route" type="button">Probe GET /api/normal-chat</button>
+          </div>
+          <div class="panel-grid">
+            <div id="health-status" class="status-panel">Waiting for read-only /health probe...</div>
+            <div id="chat-route-status" class="status-panel">Waiting for read-only GET /api/normal-chat probe...</div>
+          </div>
+        </article>
+
+        <article class="card body-card span-2">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">Route boundary</div>
+              <h2>Allowed surface vs forbidden surface</h2>
+            </div>
+            <div class="chip">Contract labels only</div>
+          </div>
+          <div class="route-grid">
+            <div class="route-column good">
+              <h3>Allowed routes</h3>
+              <ul class="route-list">
+                <li>GET /</li>
+                <li>GET /app</li>
+                <li>GET /room</li>
+                <li>GET /dev</li>
+                <li>GET /health</li>
+                <li>GET /api/normal-chat</li>
+                <li>POST /api/normal-chat</li>
+                <li>OPTIONS *</li>
+              </ul>
+            </div>
+            <div class="route-column">
+              <h3>Forbidden routes</h3>
+              <ul class="route-list">
+                <li>Absent: /api/chat-lite</li>
+                <li>Not implemented yet: /api/chat</li>
+                <li>Absent: /api/memory</li>
+                <li>Absent: /api/profile</li>
+                <li>Forbidden: /developer</li>
+                <li>Forbidden: arbitrary filesystem/static paths</li>
+              </ul>
+            </div>
+          </div>
+        </article>
+
+        <article class="card body-card">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">Boundary truth</div>
+              <h2>Read-only control-room limits</h2>
+            </div>
+            <div class="chip pass">Clean diagnostics</div>
+          </div>
+          <ul class="boundary-list">
+            <li><strong>No commands</strong> and no shell execution</li>
+            <li><strong>No file edits</strong> and no developer actions</li>
+            <li><strong>No memory writes</strong> and no profile writes</li>
+            <li><strong>No tools</strong> and no tool routes</li>
+            <li><strong>No vehicle control</strong> and no vision connected</li>
+          </ul>
+        </article>
+
+        <article class="card body-card">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">Model labels</div>
+              <h2>Label-only contract</h2>
+            </div>
+            <div class="chip">Adapter truth</div>
+          </div>
+          <ul class="fact-list">
+            <li>route label: <code>/api/normal-chat</code></li>
+            <li>mode label: <code>clean_model</code></li>
+            <li>default model label: <code>llama3.2:latest</code></li>
+            <li>adapter label: local Ollama endpoint only</li>
+            <li>timeout label: adapter-defined only</li>
+          </ul>
+        </article>
+
+        <article class="card body-card">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">Smoke verification</div>
+              <h2>Route monitor command</h2>
+            </div>
+            <div class="chip pass">Contract check</div>
+          </div>
+          <p class="panel-copy">Use the clean route smoke script on a running local server to confirm the read-only route contract still holds. The page does not run the script for you.</p>
+          <pre class="code-block"><code>python scripts/smoke_clean_routes.py --base-url http://127.0.0.1:8766</code></pre>
+          <ul class="fact-list" style="margin-top: 12px;">
+            <li>Expected result: PASS lines for clean routes and forbidden-route checks.</li>
+            <li>Expected result: <code>Clean route smoke passed.</code></li>
+            <li>If Ollama is unavailable, <code>POST /api/normal-chat</code> may return <code>502</code> or <code>504</code> but must stay honest and parseable.</li>
+          </ul>
+        </article>
+
+        <article class="card body-card span-2">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">Route-creep prevention</div>
+              <h2>Diagnostic note</h2>
+            </div>
+            <div class="chip">No fake controls</div>
+          </div>
+          <div class="boundary-columns">
+            <div class="boundary-column">
+              <h3>Visible truth boundaries</h3>
+              <ul class="boundary-list">
+                <li>read-only diagnostics</li>
+                <li>no commands</li>
+                <li>no file edits</li>
+                <li>no memory writes</li>
+                <li>no profile writes</li>
+                <li>no tools</li>
+                <li>no /api/chat-lite</li>
+              </ul>
+            </div>
+            <div class="boundary-column">
+              <h3>Clean route truth</h3>
+              <ul class="boundary-list">
+                <li>/api/normal-chat only</li>
+                <li>/api/chat-lite absent</li>
+                <li>/api/chat not implemented yet</li>
+                <li>/api/memory absent</li>
+                <li>/api/profile absent</li>
+                <li>no vehicle control and no vision connected</li>
+              </ul>
+            </div>
+          </div>
+          <div class="note-band" style="margin-top: 14px;">New features only after the contract can catch accidental route creep.</div>
+        </article>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const healthStatus = document.getElementById("health-status");
+    const chatRouteStatus = document.getElementById("chat-route-status");
+
+    function renderJsonPanel(label, payload) {
+      return `${label}\n${JSON.stringify(payload, null, 2)}`;
+    }
+
+    async function loadHealth() {
+      try {
+        const response = await fetch("/health");
+        const payload = await response.json();
+        healthStatus.textContent = response.ok
+          ? renderJsonPanel("GET /health returned", payload)
+          : renderJsonPanel(`GET /health failed with ${response.status}`, payload);
+      } catch (error) {
+        healthStatus.textContent = `GET /health failed: ${error.message}`;
+      }
+    }
+
+    async function loadChatRoute() {
+      try {
+        const response = await fetch("/api/normal-chat");
+        const payload = await response.json();
+        chatRouteStatus.textContent = response.ok
+          ? renderJsonPanel("GET /api/normal-chat returned", payload)
+          : renderJsonPanel(`GET /api/normal-chat failed with ${response.status}`, payload);
+      } catch (error) {
+        chatRouteStatus.textContent = `GET /api/normal-chat failed: ${error.message}`;
+      }
+    }
+
+    document.getElementById("refresh-health").addEventListener("click", loadHealth);
+    document.getElementById("refresh-chat-route").addEventListener("click", loadChatRoute);
+
+    loadHealth();
+    loadChatRoute();
+  </script>
+</body>
+</html>

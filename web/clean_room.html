@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aurora Clean Build</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg-0: #04010a;
+      --bg-1: #0b0615;
+      --bg-2: #170c2a;
+      --panel: rgba(17, 10, 29, 0.9);
+      --panel-strong: rgba(29, 15, 49, 0.94);
+      --panel-soft: rgba(10, 6, 18, 0.92);
+      --border: rgba(176, 133, 255, 0.26);
+      --border-strong: rgba(196, 163, 255, 0.42);
+      --text: #f4eeff;
+      --muted: #c7b7e8;
+      --accent: #b17cff;
+      --accent-strong: #cf9cff;
+      --accent-soft: rgba(177, 124, 255, 0.16);
+      --error: #ff9ec7;
+      --shadow: 0 28px 60px rgba(0, 0, 0, 0.42);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(141, 93, 255, 0.22), transparent 32%),
+        radial-gradient(circle at right 20%, rgba(215, 134, 255, 0.14), transparent 28%),
+        linear-gradient(180deg, var(--bg-2) 0%, var(--bg-1) 42%, var(--bg-0) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(120deg, rgba(255, 255, 255, 0.025), transparent 24%),
+        linear-gradient(transparent 96%, rgba(177, 124, 255, 0.07) 100%);
+      opacity: 0.85;
+    }
+
+    main {
+      position: relative;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 32px 18px 52px;
+    }
+
+    .hero,
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .hero {
+      padding: 28px;
+      background:
+        linear-gradient(140deg, rgba(40, 18, 69, 0.92), rgba(11, 7, 19, 0.92)),
+        var(--panel);
+    }
+
+    .hero-grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: minmax(0, 1.5fr) minmax(260px, 0.9fr);
+      align-items: start;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border-strong);
+      background: rgba(177, 124, 255, 0.1);
+      color: var(--accent-strong);
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      line-height: 1.02;
+      letter-spacing: 0.03em;
+      text-shadow: 0 0 28px rgba(177, 124, 255, 0.2);
+    }
+
+    .subtitle {
+      margin-bottom: 16px;
+      color: var(--muted);
+      font-size: 1.02rem;
+      line-height: 1.6;
+      max-width: 66ch;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 0 0 18px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .chip {
+      padding: 9px 13px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--accent-soft);
+      color: var(--text);
+      font-size: 0.93rem;
+      white-space: nowrap;
+    }
+
+    .hero-note {
+      margin: 0;
+      max-width: 70ch;
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    .hero-panel {
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px solid rgba(196, 163, 255, 0.18);
+      background: rgba(8, 5, 14, 0.76);
+    }
+
+    .hero-panel h2 {
+      margin-bottom: 10px;
+      font-size: 1.14rem;
+    }
+
+    .hero-panel p {
+      margin: 0 0 12px;
+    }
+
+    .summary-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .summary-list li {
+      padding: 11px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(196, 163, 255, 0.16);
+      background: rgba(15, 9, 24, 0.82);
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .summary-list strong {
+      color: var(--text);
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+      margin-top: 20px;
+    }
+
+    .card {
+      padding: 22px;
+      background:
+        linear-gradient(180deg, rgba(31, 16, 52, 0.84), rgba(11, 7, 19, 0.94)),
+        var(--panel-soft);
+    }
+
+    .dual {
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .label {
+      margin-bottom: 10px;
+      color: var(--accent-strong);
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .card h2 {
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+    }
+
+    .muted {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .boundary-list,
+    .link-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .boundary-list li,
+    .link-list li {
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(196, 163, 255, 0.16);
+      background: rgba(6, 4, 12, 0.74);
+      color: var(--muted);
+    }
+
+    .boundary-list strong,
+    .link-list strong {
+      color: var(--text);
+    }
+
+    .boundary-list span,
+    .link-list span {
+      display: block;
+      margin-top: 5px;
+      line-height: 1.5;
+    }
+
+    a {
+      color: #d5bbff;
+    }
+
+    .chat-card {
+      padding: 22px;
+      background:
+        linear-gradient(180deg, rgba(38, 19, 63, 0.94), rgba(10, 6, 17, 0.96)),
+        var(--panel-strong);
+    }
+
+    .chat-intro {
+      margin-bottom: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .chat-note {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(196, 163, 255, 0.18);
+      background: rgba(6, 4, 12, 0.78);
+      color: var(--muted);
+    }
+
+    .chat-note p {
+      margin: 0;
+    }
+
+    .chat-note strong {
+      color: var(--text);
+    }
+
+    label {
+      display: inline-block;
+      margin-bottom: 8px;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 128px;
+      padding: 15px 16px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(6, 4, 12, 0.9);
+      color: var(--text);
+      resize: vertical;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+    }
+
+    textarea:focus,
+    button:focus {
+      outline: 2px solid rgba(207, 156, 255, 0.62);
+      outline-offset: 2px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    button {
+      padding: 11px 18px;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      border-radius: 999px;
+      background: linear-gradient(135deg, #d191ff 0%, #8e58ff 52%, #5e32d9 100%);
+      color: #fff;
+      cursor: pointer;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      box-shadow: 0 14px 28px rgba(115, 74, 204, 0.28);
+    }
+
+    button:disabled {
+      opacity: 0.72;
+      cursor: wait;
+    }
+
+    .route-note {
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .status-grid {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
+    .status-tile,
+    .panel {
+      border-radius: 18px;
+      border: 1px solid rgba(196, 163, 255, 0.18);
+      background: rgba(6, 4, 12, 0.78);
+    }
+
+    .status-tile {
+      padding: 14px 16px;
+    }
+
+    .status-title {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 0.84rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .status-value {
+      display: block;
+      color: var(--text);
+      font-size: 1rem;
+      word-break: break-word;
+    }
+
+    .output-grid {
+      display: grid;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .panel {
+      padding: 14px 16px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.6;
+    }
+
+    .panel strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .error-panel {
+      border-color: rgba(255, 158, 199, 0.3);
+      color: var(--error);
+    }
+
+    .footer-rule {
+      padding: 18px 20px;
+      border-radius: 20px;
+      border: 1px solid rgba(196, 163, 255, 0.18);
+      background: rgba(6, 4, 12, 0.82);
+      color: var(--text);
+      text-align: center;
+      font-weight: 600;
+    }
+
+    @media (max-width: 860px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      main {
+        padding-inline: 14px;
+      }
+
+      .hero,
+      .card,
+      .chat-card {
+        padding: 18px;
+      }
+
+      .hero-panel {
+        padding: 16px;
+      }
+
+      h1 {
+        font-size: 2.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <div class="hero-grid">
+        <div>
+          <div class="eyebrow">Aurora showcase</div>
+          <h1>Aurora Clean Build</h1>
+          <p class="subtitle">clean companion system prototype</p>
+          <p class="hero-note">Aurora Clean Build is a clean companion-system prototype with normal chat connected through /api/normal-chat. Old Aurora is ancestry/reference, not active memory. Memory, profiles, tools, vision, and vehicle control are intentionally not connected yet.</p>
+        </div>
+
+        <aside class="hero-panel" aria-label="Showcase summary">
+          <p class="label">Showcase posture</p>
+          <h2>Presentation only</h2>
+          <p class="muted">This room remains a showcase/presentation page, not a fake capability page.</p>
+          <ul class="summary-list">
+            <li><strong>Normal chat only</strong> via <code>/api/normal-chat</code>.</li>
+            <li><strong>Old Aurora</strong> remains ancestry/reference, not active memory.</li>
+            <li><strong>No hidden power</strong> for memory, profiles, tools, vision, or vehicle control.</li>
+          </ul>
+        </aside>
+      </div>
+      <ul class="chips">
+        <li class="chip">Clean Build</li>
+        <li class="chip">Normal Chat Only</li>
+        <li class="chip">No Memory Connected</li>
+        <li class="chip">No Tools Connected</li>
+        <li class="chip">No Vehicle Control</li>
+        <li class="chip">No Vision Connected</li>
+        <li class="chip">/api/normal-chat only</li>
+      </ul>
+    </section>
+
+    <section class="grid dual">
+      <article class="card">
+        <p class="label">Identity Panel</p>
+        <h2>Showcase, not a capability claim</h2>
+        <p class="muted">Old Aurora is treated as ancestry/reference. It may inform reviewed future imports, but it is not active memory in this clean build.</p>
+        <p class="muted">This room remains a showcase/presentation page, not a fake capability page. It is a small shell for validated routes, explicit model status, and visible boundaries.</p>
+      </article>
+
+      <article class="card">
+        <p class="label">Boundary Panel</p>
+        <h2>Visible boundaries</h2>
+        <p class="muted">This clean build can chat through /api/normal-chat. It does not have memory, profiles, tools, vision, vehicle control, or old Aurora runtime access connected yet.</p>
+        <ul class="boundary-list">
+          <li><strong>No memory connected</strong><span>No memory claims or active recall are implied here.</span></li>
+          <li><strong>No profiles connected</strong><span>No profile state or private persona layer is exposed.</span></li>
+          <li><strong>No tools connected</strong><span>No tool execution or hidden developer actions sit behind the layout.</span></li>
+          <li><strong>No vision connected</strong><span>No camera, perception, or image understanding is claimed.</span></li>
+          <li><strong>No vehicle control</strong><span>No actuation or control surface is present.</span></li>
+          <li><strong>No old runtime imports</strong><span>No old Aurora UI assets or runtime access are connected.</span></li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="grid">
+      <article class="chat-card">
+        <p class="label">Chat Panel</p>
+        <h2>Normal chat only</h2>
+        <p class="chat-intro">This showcase keeps one honest interaction surface: chat requests go to <code>POST /api/normal-chat</code> only, and the reply, <code>status.mode</code>, <code>status.model</code>, and explicit errors are surfaced below.</p>
+        <div class="chat-note">
+          <p><strong>Showcase rule:</strong> no memory, profiles, tools, vision, vehicle control, file access, or command execution is implied by this panel.</p>
+          <p><strong>Connected route:</strong> <code>/api/normal-chat</code></p>
+        </div>
+
+        <div>
+          <label for="message">Message</label>
+          <textarea id="message" placeholder="Ask a public-safe question.">who are you?</textarea>
+        </div>
+
+        <div class="toolbar">
+          <button id="send-button" type="button">Send</button>
+          <span class="route-note">Contract route: <code>/api/normal-chat</code></span>
+        </div>
+
+        <div class="status-grid">
+          <div class="status-tile">
+            <span class="status-title">Status mode</span>
+            <span id="mode-output" class="status-value">waiting</span>
+          </div>
+          <div class="status-tile">
+            <span class="status-title">Status model</span>
+            <span id="model-output" class="status-value">waiting</span>
+          </div>
+        </div>
+
+        <div class="output-grid">
+          <div id="reply-output" class="panel"><strong>Reply</strong>No request sent yet.</div>
+          <div id="error-output" class="panel error-panel"><strong>Error</strong>None.</div>
+        </div>
+      </article>
+    </section>
+
+    <section class="grid dual">
+      <article class="card">
+        <p class="label">Links</p>
+        <h2>Clean route references</h2>
+        <ul class="link-list">
+          <li><strong><a href="/app">/app</a></strong><span>Return to the main clean shell.</span></li>
+          <li><strong><a href="/dev">/dev</a></strong><span>Inspect the read-only route contract and diagnostics.</span></li>
+          <li><strong><a href="/health">/health</a></strong><span>Read the clean server heartbeat.</span></li>
+          <li><strong><a href="/api/normal-chat">/api/normal-chat</a></strong><span>View the GET contract and the only connected chat endpoint.</span></li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <p class="label">Route Notes</p>
+        <h2>Locked scope</h2>
+        <p class="muted">No fake memory, fake profile, fake tool, fake vision, or fake vehicle state is presented here. The clean build stays narrow on purpose so route creep is visible before backend power grows.</p>
+        <p class="muted">That system is not connected in Aurora_Clean_Build yet. The safe next step is to review and test it before adding it.</p>
+      </article>
+    </section>
+
+    <section class="grid">
+      <div class="footer-rule">New features only after the contract can catch accidental route creep.</div>
+    </section>
+  </main>
+
+  <script>
+    const sendButton = document.getElementById("send-button");
+    const messageInput = document.getElementById("message");
+    const modeOutput = document.getElementById("mode-output");
+    const modelOutput = document.getElementById("model-output");
+    const replyOutput = document.getElementById("reply-output");
+    const errorOutput = document.getElementById("error-output");
+
+    function setReply(text) {
+      replyOutput.innerHTML = "<strong>Reply</strong>";
+      replyOutput.append(document.createTextNode(text));
+    }
+
+    function setError(text) {
+      errorOutput.innerHTML = "<strong>Error</strong>";
+      errorOutput.append(document.createTextNode(text));
+    }
+
+    async function sendMessage() {
+      sendButton.disabled = true;
+      setReply("Waiting for reply...");
+      setError("None.");
+      modeOutput.textContent = "waiting";
+      modelOutput.textContent = "waiting";
+
+      try {
+        const response = await fetch("/api/normal-chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: messageInput.value })
+        });
+        const payload = await response.json();
+        const status = payload.status || {};
+
+        setReply(payload.reply || "");
+        modeOutput.textContent = status.mode || "(missing)";
+        modelOutput.textContent = status.model || "(missing)";
+
+        if (payload.error) {
+          setError(payload.error);
+        } else if (!response.ok) {
+          setError("Request failed without a structured error message.");
+        } else {
+          setError("None.");
+        }
+      } catch (error) {
+        setReply("");
+        modeOutput.textContent = "request_failed";
+        modelOutput.textContent = "(unavailable)";
+        setError(error.message);
+      } finally {
+        sendButton.disabled = false;
+      }
+    }
+
+    sendButton.addEventListener("click", sendMessage);
+  </script>
+</body>
+</html>

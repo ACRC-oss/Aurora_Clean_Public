@@ -1,0 +1,908 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aurora Clean Build</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg-0: #05010a;
+      --bg-1: #0b0614;
+      --bg-2: #160a28;
+      --panel: rgba(15, 10, 24, 0.92);
+      --panel-strong: rgba(30, 16, 47, 0.94);
+      --panel-soft: rgba(8, 5, 13, 0.86);
+      --border: rgba(188, 144, 255, 0.18);
+      --border-strong: rgba(205, 171, 255, 0.3);
+      --text: #f5efff;
+      --muted: #c5b5e4;
+      --accent: #ca94ff;
+      --accent-strong: #e2beff;
+      --accent-soft: rgba(202, 148, 255, 0.12);
+      --success: #bce8dc;
+      --danger: #ffb7d1;
+      --shadow: 0 24px 48px rgba(0, 0, 0, 0.34);
+      --shadow-glow: 0 18px 36px rgba(131, 72, 214, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top center, rgba(174, 113, 255, 0.22), transparent 24%),
+        radial-gradient(circle at 80% 12%, rgba(109, 72, 192, 0.16), transparent 18%),
+        linear-gradient(180deg, var(--bg-2) 0%, var(--bg-1) 38%, var(--bg-0) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(115deg, rgba(255, 255, 255, 0.02), transparent 24%),
+        linear-gradient(transparent 97%, rgba(202, 148, 255, 0.05) 100%);
+    }
+
+    a {
+      color: #d7b6ff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      color: #efdcff;
+    }
+
+    main {
+      position: relative;
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 22px;
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 28px 18px 44px;
+    }
+
+    .sidebar,
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 18px;
+      align-self: start;
+      padding: 22px;
+      background:
+        linear-gradient(180deg, rgba(31, 17, 49, 0.95), rgba(8, 5, 13, 0.96)),
+        var(--panel);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .sigil {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      border: 1px solid var(--border-strong);
+      background: rgba(202, 148, 255, 0.1);
+      color: var(--accent-strong);
+      font-size: 1.35rem;
+      box-shadow: inset 0 0 16px rgba(202, 148, 255, 0.12);
+    }
+
+    .brand-copy h1,
+    .brand-copy p,
+    .hero-copy h2,
+    .hero-copy p,
+    .card h3,
+    .card p {
+      margin-top: 0;
+    }
+
+    .brand-copy h1 {
+      margin-bottom: 4px;
+      font-size: 1.2rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .brand-copy p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .nav-list,
+    .status-list,
+    .quick-links,
+    .boundary-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .nav-list {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(205, 171, 255, 0.12);
+      background: rgba(9, 6, 15, 0.68);
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .nav-link span {
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 500;
+    }
+
+    .sidebar-card {
+      padding: 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(205, 171, 255, 0.14);
+      background: rgba(9, 6, 15, 0.76);
+    }
+
+    .sidebar-card h2 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+    }
+
+    .sidebar-note {
+      margin-top: 16px;
+      box-shadow: var(--shadow-glow);
+    }
+
+    .sidebar-note p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .sidebar-note p:last-child {
+      margin-bottom: 0;
+    }
+
+    .status-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .status-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(205, 171, 255, 0.08);
+      color: var(--muted);
+    }
+
+    .status-list li:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .status-list strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .content {
+      display: grid;
+      gap: 16px;
+    }
+
+    .hero {
+      padding: 26px;
+      border-radius: 24px;
+      background:
+        linear-gradient(150deg, rgba(49, 24, 79, 0.96), rgba(10, 6, 16, 0.96)),
+        var(--panel-strong);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.95fr);
+      align-items: start;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border-strong);
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .hero-copy h2 {
+      margin-bottom: 10px;
+      font-size: clamp(2rem, 4.4vw, 3.4rem);
+      line-height: 1.04;
+      letter-spacing: 0.03em;
+    }
+
+    .hero-copy p {
+      max-width: 66ch;
+    }
+
+    .hero-kicker {
+      margin-bottom: 14px;
+      color: var(--accent-strong);
+      font-size: 1.02rem;
+      letter-spacing: 0.03em;
+      text-transform: none;
+    }
+
+    .hero-lede {
+      margin-bottom: 14px;
+      color: var(--text);
+      font-size: 1.02rem;
+      line-height: 1.8;
+    }
+
+    .hero-support {
+      margin-bottom: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .hero-aside {
+      padding: 18px 18px 16px;
+      border-radius: 22px;
+      border: 1px solid rgba(205, 171, 255, 0.16);
+      background: rgba(8, 5, 13, 0.76);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .hero-aside h3 {
+      margin: 0 0 10px;
+      font-size: 1.12rem;
+    }
+
+    .hero-aside p {
+      margin: 0 0 12px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .hero-mini-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .hero-mini-list li {
+      padding: 11px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(205, 171, 255, 0.14);
+      background: rgba(18, 11, 28, 0.82);
+      color: var(--muted);
+    }
+
+    .hero-mini-list strong {
+      color: var(--text);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 18px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(205, 171, 255, 0.16);
+      background: rgba(8, 5, 13, 0.76);
+      color: var(--text);
+      font-size: 0.92rem;
+    }
+
+    .chip strong {
+      color: var(--accent-strong);
+      font-size: 0.76rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .chip span {
+      color: var(--text);
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+
+    .card {
+      padding: 22px;
+      background:
+        linear-gradient(180deg, rgba(29, 15, 46, 0.86), rgba(8, 5, 13, 0.94)),
+        var(--panel-soft);
+    }
+
+    .span-4 {
+      grid-column: span 4;
+    }
+
+    .span-5 {
+      grid-column: span 5;
+    }
+
+    .span-7 {
+      grid-column: span 7;
+    }
+
+    .span-12 {
+      grid-column: 1 / -1;
+    }
+
+    .card-label {
+      display: inline-block;
+      margin-bottom: 10px;
+      color: var(--accent);
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .card h3 {
+      margin-bottom: 10px;
+      font-size: 1.18rem;
+    }
+
+    .card p {
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .identity-quote {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+    }
+
+    .identity-quote li,
+    .boundary-list li,
+    .quick-links li {
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(205, 171, 255, 0.14);
+      background: rgba(9, 6, 15, 0.72);
+      color: var(--muted);
+    }
+
+    .identity-quote strong,
+    .boundary-list strong,
+    .quick-links strong {
+      color: var(--text);
+    }
+
+    .identity-quote span,
+    .boundary-list span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .quick-links,
+    .boundary-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .quick-links a {
+      display: grid;
+      gap: 4px;
+      color: var(--text);
+    }
+
+    .quick-links span {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .chat-card {
+      display: grid;
+      gap: 16px;
+    }
+
+    .chat-intro {
+      margin-bottom: 0;
+    }
+
+    .chat-rail {
+      display: grid;
+      gap: 10px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(205, 171, 255, 0.14);
+      background: rgba(9, 6, 15, 0.7);
+    }
+
+    .chat-rail p {
+      margin: 0;
+    }
+
+    .chat-rail strong {
+      color: var(--text);
+    }
+
+    label {
+      display: inline-block;
+      margin-bottom: 8px;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 130px;
+      padding: 14px 15px;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: rgba(8, 5, 13, 0.88);
+      color: var(--text);
+      resize: vertical;
+      font: inherit;
+    }
+
+    textarea:focus,
+    .send-button:focus {
+      outline: 2px solid rgba(226, 190, 255, 0.52);
+      outline-offset: 2px;
+    }
+
+    .send-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .send-button {
+      min-height: 44px;
+      padding: 11px 18px;
+      border: 1px solid rgba(0, 0, 0, 0.18);
+      border-radius: 999px;
+      background: linear-gradient(135deg, #d19aff 0%, #935dff 48%, #5d33d7 100%);
+      color: #ffffff;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 14px 22px rgba(93, 51, 215, 0.18);
+    }
+
+    .send-button:disabled {
+      opacity: 0.7;
+      cursor: wait;
+    }
+
+    .send-note {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .chat-status {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
+    .chat-metric,
+    .output-panel,
+    .footer-rule {
+      border-radius: 18px;
+      border: 1px solid rgba(205, 171, 255, 0.14);
+      background: rgba(9, 6, 15, 0.72);
+    }
+
+    .chat-metric {
+      padding: 14px 16px;
+    }
+
+    .chat-metric strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .chat-metric span {
+      color: var(--success);
+      word-break: break-word;
+    }
+
+    .output-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    .output-panel {
+      padding: 14px 16px;
+      color: var(--muted);
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.6;
+    }
+
+    .output-panel strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .error-panel {
+      color: var(--danger);
+    }
+
+    .footer-rule {
+      padding: 18px 20px;
+      color: var(--text);
+      text-align: center;
+      font-weight: 600;
+      background:
+        linear-gradient(180deg, rgba(25, 13, 40, 0.94), rgba(9, 6, 15, 0.94)),
+        rgba(9, 6, 15, 0.72);
+    }
+
+    @media (max-width: 980px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+      }
+    }
+
+    @media (max-width: 880px) {
+      .span-4,
+      .span-5,
+      .span-7 {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 640px) {
+      main {
+        padding-inline: 14px;
+      }
+
+      .sidebar,
+      .card,
+      .hero {
+        padding: 18px;
+      }
+
+      .hero-aside {
+        padding: 16px;
+      }
+
+      .hero-copy h2 {
+        font-size: 2.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main id="app-top">
+    <aside class="sidebar" aria-label="App navigation">
+      <div class="brand">
+        <div class="sigil" aria-hidden="true">✦</div>
+        <div class="brand-copy">
+          <h1>Aurora</h1>
+          <p>Clean Build</p>
+        </div>
+      </div>
+
+      <nav aria-label="Section navigation">
+        <ul class="nav-list">
+          <li><a class="nav-link" href="#app-top">Home <span>overview</span></a></li>
+          <li><a class="nav-link" href="#chat-panel">Companion <span>chat</span></a></li>
+          <li><a class="nav-link" href="#boundary-panel">Boundaries <span>limits</span></a></li>
+          <li><a class="nav-link" href="/dev">Dev Status <span>read-only</span></a></li>
+        </ul>
+      </nav>
+
+      <section class="sidebar-card" aria-label="System status">
+        <h2>System status</h2>
+        <ul class="status-list">
+          <li><strong>System</strong> <span id="sidebar-system">Health check pending</span></li>
+          <li><strong>Mode</strong> <span id="sidebar-mode">waiting</span></li>
+          <li><strong>Server</strong> <span id="sidebar-server">waiting</span></li>
+          <li><strong>Model</strong> <span>llama3.2:latest</span></li>
+        </ul>
+      </section>
+
+      <section class="sidebar-card sidebar-note" aria-label="Surface scope">
+        <h2>Scope</h2>
+        <p>Clean Build · Normal Chat Only · No Memory · No Tools · No Vehicle Control</p>
+        <p><code>/health</code> powers status. <code>/api/normal-chat</code> is the only connected chat endpoint.</p>
+      </section>
+    </aside>
+
+    <div class="content">
+      <section class="hero">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <div class="eyebrow">Clean Aurora shell</div>
+            <h2>Aurora Clean Build</h2>
+            <p class="hero-kicker">Clean companion system prototype</p>
+            <p class="hero-lede">Aurora Clean Build is a clean companion-system prototype with normal chat connected through /api/normal-chat. Old Aurora is ancestry/reference, not active memory. Memory, profiles, tools, vision, and vehicle control are intentionally not connected yet.</p>
+            <p class="hero-support">This surface stays boring and testable on purpose: status comes from <code>/health</code>, chat stays on <code>POST /api/normal-chat</code>, and nothing here implies memory, profiles, tools, vision, vehicle control, file access, command execution, or old runtime access.</p>
+          </div>
+
+          <aside class="hero-aside" aria-label="Hero scope summary">
+            <span class="card-label">Scope at a glance</span>
+            <h3>Public-safe surface</h3>
+            <p>Clean Build · Normal Chat Only · No Memory · No Tools · No Vehicle Control</p>
+            <ul class="hero-mini-list">
+              <li><strong>Old Aurora</strong> remains ancestry/reference, not active memory.</li>
+              <li><strong>No Vision Connected</strong> and no hidden capability buttons.</li>
+              <li><strong>Only real route here</strong> is <code>/api/normal-chat</code> for chat plus <code>/health</code> for status.</li>
+            </ul>
+          </aside>
+        </div>
+        <ul class="chips" aria-label="System labels">
+          <li class="chip"><strong>System</strong> <span id="hero-system">Health check pending</span></li>
+          <li class="chip"><strong>Runtime Mode</strong> <span id="hero-mode">clean</span></li>
+          <li class="chip"><strong>Model</strong> <span>llama3.2:latest</span></li>
+          <li class="chip"><strong>Chat Route</strong> <span>/api/normal-chat only</span></li>
+          <li class="chip"><strong>Vision</strong> <span>No Vision Connected</span></li>
+        </ul>
+      </section>
+
+      <section class="grid">
+        <article class="card span-4">
+          <span class="card-label">Identity</span>
+          <h3>Identity and ancestry</h3>
+          <p>Old Aurora is treated as ancestry/reference. It may inform reviewed future imports, but it is not active memory in this clean build.</p>
+          <ul class="identity-quote">
+            <li><strong>Normal Chat Only</strong><span><code>/api/normal-chat</code> is the only connected chat endpoint.</span></li>
+            <li><strong>No Memory</strong><span>Conversation context is not active memory, and old Aurora is not active memory in this clean build.</span></li>
+            <li><strong>No Profiles</strong><span>Profiles are not connected, and no private runtime state is implied.</span></li>
+          </ul>
+        </article>
+
+        <article id="boundary-panel" class="card span-4">
+          <span class="card-label">Boundaries</span>
+          <h3>Readable boundaries</h3>
+          <p>This clean build can chat through /api/normal-chat. It does not have memory, profiles, tools, vision, vehicle control, or old Aurora runtime access connected yet.</p>
+          <p>That system is not connected in Aurora_Clean_Build yet. The safe next step is to review and test it before adding it.</p>
+          <ul class="boundary-list">
+            <li><strong>No Memory</strong><span>No memory connected, and the chat panel does not imply recall beyond the current request.</span></li>
+            <li><strong>No Profiles</strong><span>No profiles connected, and no private persona layer is available.</span></li>
+            <li><strong>No Tools</strong><span>No tools connected, and there are no hidden developer or tool execution controls.</span></li>
+            <li><strong>No Vehicle Control</strong><span>No vehicle control is connected anywhere on this page.</span></li>
+            <li><strong>No Vision Connected</strong><span>No vision connected, and nothing here implies camera, vision, or perception access.</span></li>
+            <li><strong>No file access or editing</strong><span>The interface does not expose file reads, file writes, or shell execution.</span></li>
+            <li><strong>Old Aurora is ancestry/reference only</strong><span>Reviewed future imports may happen later, but old runtime access is not connected yet.</span></li>
+          </ul>
+        </article>
+
+        <article class="card span-4">
+          <span class="card-label">Quick links</span>
+          <h3>Safe route links</h3>
+          <ul class="quick-links">
+            <li><a href="/room"><strong>Open /room</strong><span>Move to the showcase/presentation surface without changing capabilities.</span></a></li>
+            <li><a href="/dev"><strong>Open /dev</strong><span>Review read-only diagnostics and the locked route contract.</span></a></li>
+            <li><a href="/health"><strong>Check /health</strong><span>Read the clean heartbeat JSON that powers the status surfaces.</span></a></li>
+            <li><a href="/api/normal-chat"><strong>Read /api/normal-chat</strong><span>Open the GET contract for the only connected chat endpoint.</span></a></li>
+          </ul>
+        </article>
+
+        <article id="chat-panel" class="card span-7 chat-card">
+          <span class="card-label">Talk with Aurora</span>
+          <h3>Talk with Aurora</h3>
+          <p class="chat-intro">This is the only live interaction on <code>/app</code>. Chat uses <code>POST /api/normal-chat</code> only, and the reply, <code>status.mode</code>, <code>status.model</code>, and error panels below reflect the real server response.</p>
+          <div class="chat-rail">
+            <p><strong>Truth boundary:</strong> no memory, profiles, tools, vision, vehicle control, file access, or command execution is implied by this panel.</p>
+            <p><strong>Connected route:</strong> <code>POST /api/normal-chat</code></p>
+          </div>
+
+          <div>
+            <label for="message">Message</label>
+            <textarea id="message" placeholder="Ask a public-safe question.">who are you?</textarea>
+          </div>
+
+          <div class="send-row">
+            <button id="send-button" class="send-button" type="button">Send</button>
+            <span class="send-note">Enter sends. Shift+Enter adds a newline.</span>
+          </div>
+
+          <div class="chat-status">
+            <div class="chat-metric">
+              <strong>status.mode</strong>
+              <span id="mode-output">waiting</span>
+            </div>
+            <div class="chat-metric">
+              <strong>status.model</strong>
+              <span id="model-output">waiting</span>
+            </div>
+          </div>
+
+          <div class="output-grid">
+            <div id="reply-output" class="output-panel"><strong>Reply</strong>No request sent yet.</div>
+            <div id="error-output" class="output-panel error-panel"><strong>Error</strong>None.</div>
+          </div>
+        </article>
+
+        <article class="card span-5">
+          <span class="card-label">Surface promises</span>
+          <h3>What this page promises</h3>
+          <p>Clean Build · Normal Chat Only · No Memory · No Tools · No Vehicle Control</p>
+          <p>This shell stays visually polished while remaining contract-bound. Buttons either navigate to safe internal sections, link to existing clean routes, or call the existing health/chat contract only.</p>
+          <ul class="boundary-list">
+            <li><strong>Buttons and links stay real</strong><span>No fake feature buttons, no hidden tools, and no arbitrary file paths.</span></li>
+            <li><strong>Health stays honest</strong><span>Status still comes from <code>/health</code> if the server exposes it.</span></li>
+            <li><strong>Normal Chat</strong><span>Chat still goes through <code>/api/normal-chat</code> only.</span></li>
+            <li><strong>Old Aurora</strong><span>Remains ancestry/reference, not active memory.</span></li>
+          </ul>
+        </article>
+
+        <div class="footer-rule span-12">New features only after the contract can catch accidental route creep.</div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const sidebarSystem = document.getElementById("sidebar-system");
+    const sidebarMode = document.getElementById("sidebar-mode");
+    const sidebarServer = document.getElementById("sidebar-server");
+    const heroSystem = document.getElementById("hero-system");
+    const heroMode = document.getElementById("hero-mode");
+    const messageInput = document.getElementById("message");
+    const sendButton = document.getElementById("send-button");
+    const replyOutput = document.getElementById("reply-output");
+    const modeOutput = document.getElementById("mode-output");
+    const modelOutput = document.getElementById("model-output");
+    const errorOutput = document.getElementById("error-output");
+
+    function setReply(text) {
+      replyOutput.innerHTML = "<strong>Reply</strong>";
+      replyOutput.append(document.createTextNode(text));
+    }
+
+    function setError(text) {
+      errorOutput.innerHTML = "<strong>Error</strong>";
+      errorOutput.append(document.createTextNode(text));
+    }
+
+    function setHealthFailure(message) {
+      sidebarSystem.textContent = "Offline";
+      sidebarMode.textContent = "Health check failed";
+      sidebarServer.textContent = "Health check failed";
+      heroSystem.textContent = message || "Offline";
+      heroMode.textContent = "clean";
+    }
+
+    async function loadHealth() {
+      try {
+        const response = await fetch("/health");
+        const payload = await response.json();
+        if (response.ok && payload.ok === true) {
+          sidebarSystem.textContent = "Online";
+          sidebarMode.textContent = payload.mode || "clean";
+          sidebarServer.textContent = payload.server || "Aurora_Clean_Build";
+          heroSystem.textContent = "Online";
+          heroMode.textContent = payload.mode || "clean";
+        } else {
+          setHealthFailure(`Health check failed (${response.status})`);
+        }
+      } catch (error) {
+        setHealthFailure("Health check failed");
+      }
+    }
+
+    async function sendMessage() {
+      sendButton.disabled = true;
+      setReply("Waiting for reply...");
+      setError("None.");
+      modeOutput.textContent = "waiting";
+      modelOutput.textContent = "waiting";
+
+      try {
+        const response = await fetch("/api/normal-chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: messageInput.value })
+        });
+        const payload = await response.json();
+        const status = payload.status || {};
+
+        setReply(payload.reply || "");
+        modeOutput.textContent = status.mode || "(missing)";
+        modelOutput.textContent = status.model || "(missing)";
+
+        if (payload.error) {
+          setError(payload.error);
+        } else if (!response.ok) {
+          setError(`Request failed with status ${response.status}.`);
+        } else {
+          setError("None.");
+        }
+      } catch (error) {
+        setReply("");
+        modeOutput.textContent = "request_failed";
+        modelOutput.textContent = "(unavailable)";
+        setError(error.message);
+      } finally {
+        sendButton.disabled = false;
+      }
+    }
+
+    messageInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        if (!sendButton.disabled) {
+          sendMessage();
+        }
+      }
+    });
+
+    sendButton.addEventListener("click", sendMessage);
+    loadHealth();
+  </script>
+</body>
+</html>

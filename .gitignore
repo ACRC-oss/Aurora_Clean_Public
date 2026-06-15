@@ -1,0 +1,16 @@
+__pycache__/
+.pytest_cache/
+*.pyc
+.env
+.env.*
+*.log
+logs/
+sessions/
+cache/
+data/
+11_DATA_RUNTIME/
+*.zip
+*.7z
+*.rar
+.DS_Store
+Thumbs.db
