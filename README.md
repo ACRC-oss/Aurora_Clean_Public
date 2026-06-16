@@ -75,7 +75,7 @@ The server exposes one chat POST route. Memory, profiles, tools, vision, vehicle
 
 ## Do-Not-Claim List
 
-Do not claim that this prototype has active memory, profiles, unrestricted tools, hidden autonomy, vehicle control, self-direction, human-like awareness, or production-grade identity and access control.
+I do not claim that this prototype has active memory, profiles, unrestricted tools, hidden autonomy, vehicle control, self-direction, human-like awareness, or production-grade identity and access control.
 
 ## Copyright / Ownership Notice
 
